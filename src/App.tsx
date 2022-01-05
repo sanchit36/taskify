@@ -1,7 +1,7 @@
 import React from 'react';
-import './App.css';
 import InputField from './components/InputField';
 import TodoList from './components/TodoList';
+import './App.css';
 
 const App: React.FC = () => {
   return (
