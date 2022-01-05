@@ -2,6 +2,11 @@ import { useEffect, useReducer } from 'react';
 import { addTodos, getTodos } from '../helpers/localStore';
 import { Todo } from '../models/model';
 
+export interface Context {
+  active: Todo[];
+  completed: Todo[];
+}
+
 type Actions =
   | { type: 'add'; payload: string }
   | {
@@ -12,35 +17,60 @@ type Actions =
       };
     }
   | { type: 'delete'; payload: number }
-  | { type: 'done'; payload: number }
-  | { type: 'set'; payload: Todo[] };
+  | { type: 'done'; payload: Todo }
+  | { type: 'set'; payload: Context };
 
-const TodoReducer = (state: Todo[], action: Actions) => {
+const TodoReducer = (state: Context, action: Actions): Context => {
   switch (action.type) {
     case 'add':
-      return [
+      return {
         ...state,
-        {
-          id: Date.now(),
-          todo: action.payload,
-          isDone: false,
-        },
-      ];
+        active: [
+          ...state.active,
+          {
+            id: Date.now(),
+            todo: action.payload,
+            isDone: false,
+          },
+        ],
+      };
 
     case 'update':
-      return state.map((todo) =>
-        todo.id === action.payload.id
-          ? { ...todo, todo: action.payload.text }
-          : todo
-      );
+      return {
+        ...state,
+        active: state.active.map((todo) =>
+          todo.id === action.payload.id
+            ? { ...todo, todo: action.payload.text }
+            : todo
+        ),
+      };
 
     case 'delete':
-      return state.filter((todo) => todo.id !== action.payload);
+      return {
+        ...state,
+        completed: state.completed.filter((todo) => todo.id !== action.payload),
+        active: state.active.filter((todo) => todo.id !== action.payload),
+      };
 
     case 'done':
-      return state.map((todo) =>
-        todo.id === action.payload ? { ...todo, isDone: !todo.isDone } : todo
-      );
+      if (action.payload.isDone) {
+        return {
+          active: [
+            ...state.active,
+            { ...action.payload, isDone: !action.payload.isDone },
+          ],
+          completed: state.completed.filter(
+            (todo) => todo.id !== action.payload.id
+          ),
+        };
+      } else
+        return {
+          completed: [
+            ...state.completed,
+            { ...action.payload, isDone: !action.payload.isDone },
+          ],
+          active: state.active.filter((todo) => todo.id !== action.payload.id),
+        };
 
     case 'set':
       return action.payload;
@@ -50,8 +80,13 @@ const TodoReducer = (state: Todo[], action: Actions) => {
   }
 };
 
+const INITIAL_STATE: Context = {
+  active: [],
+  completed: [],
+};
+
 const useValue = () => {
-  const [state, dispatch] = useReducer(TodoReducer, []);
+  const [state, dispatch] = useReducer(TodoReducer, INITIAL_STATE);
 
   useEffect(() => {
     const todos = getTodos();
