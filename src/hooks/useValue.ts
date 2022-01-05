@@ -59,7 +59,7 @@ const TodoReducer = (state: Context, action: Actions): Context => {
             ...state.active,
             { ...action.payload, isDone: !action.payload.isDone },
           ],
-          completed: state.active.filter(
+          completed: state.completed.filter(
             (todo) => todo.id !== action.payload.id
           ),
         };
@@ -90,7 +90,6 @@ const useValue = () => {
 
   useEffect(() => {
     const todos = getTodos();
-    console.log(todos);
     dispatch({ type: 'set', payload: todos });
   }, []);
 

@@ -6,5 +6,5 @@ export const addTodos = (todos: Context) => {
 
 export const getTodos: () => Context = () => {
   const todos = localStorage.getItem('todos');
-  return todos ? JSON.parse(todos) : [];
+  return todos ? JSON.parse(todos) : { active: [], completed: [] };
 };
