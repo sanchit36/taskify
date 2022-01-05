@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Todo } from '../models/model';
 import { AiFillDelete, AiFillEdit } from 'react-icons/ai';
 import { MdDone } from 'react-icons/md';
+import { TodoContext } from '../context/Todo';
 
 interface SingleTodoProps {
   todo: Todo;
-  todos: Todo[];
-  setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
 }
 
-const SingleTodo: React.FC<SingleTodoProps> = ({ todo, todos, setTodos }) => {
+const SingleTodo: React.FC<SingleTodoProps> = ({ todo }) => {
+  const { dispatch } = useContext(TodoContext);
   const [editTodo, setEditTodo] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -20,23 +20,17 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, todos, setTodos }) => {
   };
 
   const handleDelete = (id: number) => {
-    setTodos((prev) => prev.filter((todo) => todo.id !== id));
+    dispatch({ type: 'delete', payload: id });
   };
 
   const handleDone = (id: number) => {
-    setTodos((prev) =>
-      prev.map((todo) =>
-        todo.id === id ? { ...todo, isDone: !todo.isDone } : todo
-      )
-    );
+    dispatch({ type: 'done', payload: id });
   };
 
   const handleEditSubmit = (e: React.FormEvent, id: number) => {
     e.preventDefault();
     if (editTodo) {
-      setTodos((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, todo: editTodo } : t))
-      );
+      dispatch({ type: 'update', payload: { id, text: editTodo } });
     }
     setEditTodo(null);
   };
