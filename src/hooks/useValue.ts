@@ -55,6 +55,7 @@ const TodoReducer = (state: Context, action: Actions): Context => {
     case 'done':
       if (action.payload.isDone) {
         return {
+          ...state,
           active: [
             ...state.active,
             { ...action.payload, isDone: !action.payload.isDone },
@@ -65,6 +66,7 @@ const TodoReducer = (state: Context, action: Actions): Context => {
         };
       } else
         return {
+          ...state,
           completed: [
             ...state.completed,
             { ...action.payload, isDone: !action.payload.isDone },

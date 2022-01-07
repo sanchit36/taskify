@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Todo } from '../models/model';
 import { AiFillDelete, AiFillEdit } from 'react-icons/ai';
-import { MdDone } from 'react-icons/md';
+import { MdDone, MdClose } from 'react-icons/md';
 import { TodoContext } from '../context/Todo';
 import { Draggable } from 'react-beautiful-dnd';
 
@@ -75,15 +75,23 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
               </div>
             ) : (
               <div>
-                <span className='icon' onClick={() => handleEdit(todo.todo)}>
-                  <AiFillEdit />
-                </span>
+                {!todo.isDone && (
+                  <span className='icon' onClick={() => handleEdit(todo.todo)}>
+                    <AiFillEdit />
+                  </span>
+                )}
                 <span className='icon' onClick={() => handleDelete(todo.id)}>
                   <AiFillDelete />
                 </span>
-                <span className='icon' onClick={() => handleDone()}>
-                  <MdDone />
-                </span>
+                {!todo.isDone ? (
+                  <span className='icon' onClick={() => handleDone()}>
+                    <MdDone />
+                  </span>
+                ) : (
+                  <span className='icon' onClick={() => handleDone()}>
+                    <MdClose />
+                  </span>
+                )}
               </div>
             )}
           </form>

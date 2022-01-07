@@ -53,7 +53,9 @@ const TodoList: React.FC = () => {
               ref={provider.innerRef}
               {...provider.droppableProps}
             >
-              <span className='todos__heading'>Active Tasks</span>
+              <span className='todos__heading'>
+                Active Tasks <strong>{todos.active.length}</strong>
+              </span>
               {todos.active.map((todo, index) => (
                 <SingleTodo key={todo.id} index={index} todo={todo} />
               ))}
@@ -70,7 +72,9 @@ const TodoList: React.FC = () => {
               ref={provider.innerRef}
               {...provider.droppableProps}
             >
-              <span className='todos__heading'>Completed Tasks</span>
+              <span className='todos__heading'>
+                Completed Tasks <strong>{todos.completed.length}</strong>
+              </span>
               {todos.completed.map((todo, index) => (
                 <SingleTodo key={todo.id} index={index} todo={todo} />
               ))}
