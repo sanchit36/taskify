@@ -4,6 +4,7 @@ import { AiFillDelete, AiFillEdit } from 'react-icons/ai';
 import { MdDone, MdClose } from 'react-icons/md';
 import { TodoContext } from '../context/Todo';
 import { Draggable } from 'react-beautiful-dnd';
+import Modal from './Modal';
 
 interface SingleTodoProps {
   todo: Todo;
@@ -14,6 +15,7 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
   const { dispatch } = useContext(TodoContext);
   const [editTodo, setEditTodo] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [show, setShow] = useState(false);
 
   const handleEdit = (text: string) => {
     if (editTodo === null && !todo.isDone) {
@@ -21,18 +23,18 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
     }
   };
 
-  const handleDelete = (id: number) => {
-    dispatch({ type: 'delete', payload: id });
+  const handleDelete = () => {
+    setShow(true);
   };
 
   const handleDone = () => {
     dispatch({ type: 'done', payload: todo });
   };
 
-  const handleEditSubmit = (e: React.FormEvent, id: number) => {
+  const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editTodo) {
-      dispatch({ type: 'update', payload: { id, text: editTodo } });
+      dispatch({ type: 'update', payload: { id: todo.id, text: editTodo } });
     }
     setEditTodo(null);
   };
@@ -41,63 +43,92 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
     if (editTodo !== null) inputRef.current?.focus();
   }, [editTodo]);
 
-  return (
-    <Draggable draggableId={todo.id.toString()} index={index}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-        >
-          <form
-            className={`todos__single ${snapshot.isDragging ? 'drag' : ''}  ${
-              todo.isDone ? 'done' : ''
-            }`}
-            onSubmit={(e) => handleEditSubmit(e, todo.id)}
-          >
-            {editTodo !== null ? (
-              <input
-                ref={inputRef}
-                type='text'
-                value={editTodo}
-                onChange={(e) => setEditTodo(e.target.value)}
-                className='todos__single--text'
-              />
-            ) : (
-              <span className='todos__single--text'>{todo.todo}</span>
-            )}
+  const cancelDeleteHandler = () => {
+    setShow(false);
+  };
 
-            {editTodo !== null ? (
-              <div>
-                <button type='submit' className='icon'>
-                  <MdDone />
-                </button>
-              </div>
-            ) : (
-              <div>
-                {!todo.isDone && (
-                  <span className='icon' onClick={() => handleEdit(todo.todo)}>
-                    <AiFillEdit />
-                  </span>
-                )}
-                <span className='icon' onClick={() => handleDelete(todo.id)}>
-                  <AiFillDelete />
-                </span>
-                {!todo.isDone ? (
-                  <span className='icon' onClick={() => handleDone()}>
+  const confirmDeleteHandler = () => {
+    setShow(false);
+    dispatch({ type: 'delete', payload: todo.id });
+  };
+
+  return (
+    <React.Fragment>
+      <Modal
+        show={show}
+        onCancel={cancelDeleteHandler}
+        header='Are you sure you want to delete this task?'
+        footer={
+          <React.Fragment>
+            <button className='btn' onClick={cancelDeleteHandler}>
+              CANCEL
+            </button>
+            <button className='btn danger' onClick={confirmDeleteHandler}>
+              DELETE
+            </button>
+          </React.Fragment>
+        }
+      />
+      <Draggable draggableId={todo.id.toString()} index={index}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+          >
+            <form
+              className={`todos__single ${snapshot.isDragging ? 'drag' : ''}  ${
+                todo.isDone ? 'done' : ''
+              }`}
+              onSubmit={handleEditSubmit}
+            >
+              {editTodo !== null ? (
+                <input
+                  ref={inputRef}
+                  type='text'
+                  value={editTodo}
+                  onChange={(e) => setEditTodo(e.target.value)}
+                  className='todos__single--text'
+                />
+              ) : (
+                <span className='todos__single--text'>{todo.todo}</span>
+              )}
+
+              {editTodo !== null ? (
+                <div>
+                  <button type='submit' className='icon'>
                     <MdDone />
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  {!todo.isDone && (
+                    <span
+                      className='icon'
+                      onClick={() => handleEdit(todo.todo)}
+                    >
+                      <AiFillEdit />
+                    </span>
+                  )}
+                  <span className='icon' onClick={handleDelete}>
+                    <AiFillDelete />
                   </span>
-                ) : (
-                  <span className='icon' onClick={() => handleDone()}>
-                    <MdClose />
-                  </span>
-                )}
-              </div>
-            )}
-          </form>
-        </div>
-      )}
-    </Draggable>
+                  {!todo.isDone ? (
+                    <span className='icon' onClick={handleDone}>
+                      <MdDone />
+                    </span>
+                  ) : (
+                    <span className='icon' onClick={handleDone}>
+                      <MdClose />
+                    </span>
+                  )}
+                </div>
+              )}
+            </form>
+          </div>
+        )}
+      </Draggable>
+    </React.Fragment>
   );
 };
 

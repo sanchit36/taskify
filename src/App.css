@@ -48,6 +48,25 @@
   cursor: pointer;
 }
 
+.btn {
+  border: none;
+  padding: 0.5rem 2rem;
+  font-size: 1.5rem;
+  background-color: #2f74c0;
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px black;
+  cursor: pointer;
+}
+
+.btn.danger {
+  background-color: rgb(255, 60, 90);
+}
+
+.btn + .btn {
+  margin-left: 2rem;
+}
+
 @media (max-width: 800px) {
   .heading {
     margin: 15px 0;
