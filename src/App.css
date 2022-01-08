@@ -72,4 +72,17 @@
     margin: 15px 0;
     font-size: 35px;
   }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+
+  .btn + .btn {
+    margin-left: 1.5rem;
+  }
+
+  .modal__header h2 {
+    font-size: 1.25rem;
+  }
 }
