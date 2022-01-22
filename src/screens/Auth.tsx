@@ -1,28 +1,17 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { GrFacebook, GrGithub } from 'react-icons/gr';
 
 import IconButton from '../components/IconButton';
-import { UserContext } from '../context/User';
-import { addUser, googleSignIn } from '../firebase';
-import { User } from '../models/model';
+import { facebookSignIn, githubSignIn, googleSignIn } from '../firebase';
 
 const Auth = () => {
-  const { loginUser } = useContext(UserContext);
   const [error, setError] = useState<string | null>(null);
 
   const googleSignInHandler = async () => {
     setError(null);
     try {
-      const userCredentials = await googleSignIn();
-      const user: User = {
-        id: userCredentials.user.uid,
-        displayName: userCredentials.user.displayName,
-        email: userCredentials.user.email,
-        avatar: userCredentials.user.photoURL,
-      };
-      await addUser(user);
-      loginUser(user);
+      await googleSignIn();
     } catch (error: any) {
       setError(error.message);
     }
@@ -31,8 +20,7 @@ const Auth = () => {
   const facebookSignInHandler = async () => {
     setError(null);
     try {
-      const userCredentials = await googleSignIn();
-      console.log(userCredentials);
+      await facebookSignIn();
     } catch (error: any) {
       setError(error.message);
     }
@@ -41,8 +29,7 @@ const Auth = () => {
   const githubSignInHandler = async () => {
     setError(null);
     try {
-      const userCredentials = await googleSignIn();
-      console.log(userCredentials);
+      await githubSignIn();
     } catch (error: any) {
       setError(error.message);
     }
