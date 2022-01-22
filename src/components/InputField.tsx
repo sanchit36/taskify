@@ -10,7 +10,7 @@ const InputField: React.FC = () => {
   const handleAdd = (event: React.FormEvent) => {
     event.preventDefault();
     if (todo) {
-      dispatch({ type: 'add', payload: todo });
+      // dispatch({ type: 'add', payload: todo });
       setTodo('');
     }
   };

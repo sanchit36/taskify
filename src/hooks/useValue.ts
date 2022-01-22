@@ -1,38 +1,31 @@
 import { useEffect, useReducer } from 'react';
-import { addTodos, getTodos } from '../helpers/localStore';
+import { addTodos } from '../helpers/localStore';
 import { Todo } from '../models/model';
 
-export interface Context {
+export interface State {
   active: Todo[];
   completed: Todo[];
 }
 
 type Actions =
-  | { type: 'add'; payload: string }
+  | { type: 'add'; payload: Todo }
   | {
       type: 'update';
       payload: {
-        id: number;
+        id: string;
         text: string;
       };
     }
-  | { type: 'delete'; payload: number }
+  | { type: 'delete'; payload: string }
   | { type: 'done'; payload: Todo }
-  | { type: 'set'; payload: Context };
+  | { type: 'set'; payload: State };
 
-const TodoReducer = (state: Context, action: Actions): Context => {
+const TodoReducer = (state: State, action: Actions): State => {
   switch (action.type) {
     case 'add':
       return {
         ...state,
-        active: [
-          ...state.active,
-          {
-            id: Date.now(),
-            todo: action.payload,
-            isDone: false,
-          },
-        ],
+        active: [...state.active, action.payload],
       };
 
     case 'update':
@@ -82,18 +75,13 @@ const TodoReducer = (state: Context, action: Actions): Context => {
   }
 };
 
-const INITIAL_STATE: Context = {
+const INITIAL_STATE: State = {
   active: [],
   completed: [],
 };
 
 const useValue = () => {
   const [state, dispatch] = useReducer(TodoReducer, INITIAL_STATE);
-
-  useEffect(() => {
-    const todos = getTodos();
-    dispatch({ type: 'set', payload: todos });
-  }, []);
 
   useEffect(() => {
     addTodos(state);

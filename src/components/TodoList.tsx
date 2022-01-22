@@ -1,11 +1,15 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
+
 import { TodoContext } from '../context/Todo';
+import { UserContext } from '../context/User';
+import { getTasksByUserId } from '../firebase';
 import { Todo } from '../models/model';
 import SingleTodo from './SingleTodo';
 import './styles.css';
 
 const TodoList: React.FC = () => {
+  const { user } = useContext(UserContext);
   const { todos, dispatch } = useContext(TodoContext);
 
   const onDragEnd = (result: DropResult) => {
@@ -40,6 +44,19 @@ const TodoList: React.FC = () => {
 
     dispatch({ type: 'set', payload: { active, completed } });
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const todos = await getTasksByUserId(user?.id!);
+        dispatch({ type: 'set', payload: todos });
+        console.log(todos);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, [dispatch, user?.id]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
