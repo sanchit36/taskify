@@ -3,3 +3,10 @@ export interface Todo {
   todo: string;
   isDone: boolean;
 }
+
+export interface User {
+  id: string;
+  displayName: string | null;
+  email: string | null;
+  avatar: string | null;
+}
