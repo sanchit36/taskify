@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { TodoContext } from '../context/Todo';
 import './styles.css';
 
@@ -14,6 +14,12 @@ const InputField: React.FC = () => {
       setTodo('');
     }
   };
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [todo]);
 
   return (
     <form
