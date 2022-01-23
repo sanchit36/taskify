@@ -65,10 +65,9 @@ export const updateTask = async (
 ) => {
   try {
     const docRef = doc(db, 'tasks', taskId);
-    const updatedDocRef = await updateDoc(docRef, options);
-    console.log(updatedDocRef);
+    await updateDoc(docRef, options);
   } catch (error) {
-    console.log('Error updating task: ' + error);
+    console.error('Error updating task: ' + error);
     throw new Error('Error updating task');
   }
 };
@@ -80,5 +79,11 @@ export const deleteTask = async (taskId: string) => {
   } catch (error) {
     console.error('ERROR deleting task', error);
     throw new Error('Error deleting task');
+  }
+};
+
+export const deleteAllTask = async (tasks: Todo[]) => {
+  for (const task of tasks) {
+    await deleteTask(task.id);
   }
 };

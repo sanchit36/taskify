@@ -7,9 +7,11 @@ import { AiOutlineClear } from 'react-icons/ai';
 import { TodoContext } from '../context/Todo';
 import Modal from '../components/Modal';
 import Navbar from '../components/Navbar';
+import { deleteAllTask } from '../firebase/todo';
+import Spinner from '../components/Spinner';
 
 const Main: React.FC = () => {
-  const { dispatch } = useContext(TodoContext);
+  const { active, completed, dispatch, loading } = useContext(TodoContext);
   const [show, setShow] = useState(false);
 
   const handleClear = () => {
@@ -20,7 +22,10 @@ const Main: React.FC = () => {
     setShow(false);
   };
 
-  const confirmClearHandler = () => {
+  const confirmClearHandler = async () => {
+    dispatch({ type: 'loading', payload: 'clear' });
+    await deleteAllTask([...active, ...completed]);
+    dispatch({ type: 'loading', payload: null });
     setShow(false);
     dispatch({ type: 'set', payload: { active: [], completed: [] } });
   };
@@ -36,7 +41,20 @@ const Main: React.FC = () => {
             <button className='btn' onClick={cancelClearHandler}>
               CANCEL
             </button>
-            <button className='btn danger' onClick={confirmClearHandler}>
+            <button
+              className='btn danger'
+              onClick={confirmClearHandler}
+              disabled={loading === 'clear'}
+            >
+              {loading === 'clear' && (
+                <Spinner
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    margin: 'auto',
+                  }}
+                />
+              )}
               CLEAR
             </button>
           </React.Fragment>

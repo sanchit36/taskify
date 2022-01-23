@@ -56,7 +56,7 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
   };
 
   const confirmDeleteHandler = async () => {
-    dispatch({ type: 'loading', payload: 'update' });
+    dispatch({ type: 'loading', payload: 'delete' });
     await deleteTask(todo.id);
     dispatch({ type: 'loading', payload: null });
     dispatch({ type: 'delete', payload: todo.id });
