@@ -1,38 +1,40 @@
-import { useEffect, useReducer } from 'react';
-import { addTodos, getTodos } from '../helpers/localStore';
+import { useReducer } from 'react';
 import { Todo } from '../models/model';
 
-export interface Context {
+export interface State {
+  error: string | null;
+  loading: string | null;
   active: Todo[];
   completed: Todo[];
 }
 
 type Actions =
-  | { type: 'add'; payload: string }
+  | { type: 'add'; payload: Todo }
   | {
       type: 'update';
       payload: {
-        id: number;
+        id: string;
         text: string;
       };
     }
-  | { type: 'delete'; payload: number }
+  | { type: 'delete'; payload: string }
   | { type: 'done'; payload: Todo }
-  | { type: 'set'; payload: Context };
+  | { type: 'set'; payload: { active: Todo[]; completed: Todo[] } }
+  | { type: 'loading'; payload: string | null }
+  | { type: 'error'; payload: string | null };
 
-const TodoReducer = (state: Context, action: Actions): Context => {
+const TodoReducer = (state: State, action: Actions): State => {
   switch (action.type) {
+    case 'loading':
+      return {
+        ...state,
+        loading: action.payload,
+      };
+
     case 'add':
       return {
         ...state,
-        active: [
-          ...state.active,
-          {
-            id: Date.now(),
-            todo: action.payload,
-            isDone: false,
-          },
-        ],
+        active: [...state.active, action.payload],
       };
 
     case 'update':
@@ -75,14 +77,19 @@ const TodoReducer = (state: Context, action: Actions): Context => {
         };
 
     case 'set':
-      return action.payload;
+      return {
+        ...state,
+        ...action.payload,
+      };
 
     default:
       return state;
   }
 };
 
-const INITIAL_STATE: Context = {
+const INITIAL_STATE: State = {
+  error: null,
+  loading: null,
   active: [],
   completed: [],
 };
@@ -90,17 +97,11 @@ const INITIAL_STATE: Context = {
 const useValue = () => {
   const [state, dispatch] = useReducer(TodoReducer, INITIAL_STATE);
 
-  useEffect(() => {
-    const todos = getTodos();
-    dispatch({ type: 'set', payload: todos });
-  }, []);
-
-  useEffect(() => {
-    addTodos(state);
-  }, [state]);
-
   return {
-    todos: state,
+    loading: state.loading,
+    error: state.error,
+    active: state.active,
+    completed: state.completed,
     dispatch,
   };
 };

@@ -1,12 +1,16 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
+
 import { TodoContext } from '../context/Todo';
+import { UserContext } from '../context/User';
+import { getTasksByUserId, updateTask } from '../firebase/todo';
 import { Todo } from '../models/model';
 import SingleTodo from './SingleTodo';
 import './styles.css';
 
 const TodoList: React.FC = () => {
-  const { todos, dispatch } = useContext(TodoContext);
+  const { user } = useContext(UserContext);
+  const { active, completed, dispatch } = useContext(TodoContext);
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -19,27 +23,44 @@ const TodoList: React.FC = () => {
       return;
 
     let add,
-      active: Todo[] = [...todos.active],
-      completed: Todo[] = [...todos.completed];
+      newActive: Todo[] = [...active],
+      newCompleted: Todo[] = [...completed];
 
     if (source.droppableId === 'active-todos') {
-      add = active[source.index];
-      active.splice(source.index, 1);
+      add = newActive[source.index];
+      newActive.splice(source.index, 1);
     } else {
-      add = completed[source.index];
-      completed.splice(source.index, 1);
+      add = newCompleted[source.index];
+      newCompleted.splice(source.index, 1);
     }
 
     if (destination.droppableId === 'active-todos') {
+      updateTask(add.id, { isDone: false });
       add.isDone = false;
-      active.splice(destination.index, 0, add);
+      newActive.splice(destination.index, 0, add);
     } else {
+      updateTask(add.id, { isDone: true });
       add.isDone = true;
-      completed.splice(destination.index, 0, add);
+      newCompleted.splice(destination.index, 0, add);
     }
 
-    dispatch({ type: 'set', payload: { active, completed } });
+    dispatch({
+      type: 'set',
+      payload: { active: newActive, completed: newCompleted },
+    });
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const todos = await getTasksByUserId(user?.id!);
+        dispatch({ type: 'set', payload: todos });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, [dispatch, user?.id]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -54,9 +75,9 @@ const TodoList: React.FC = () => {
               {...provider.droppableProps}
             >
               <span className='todos__heading'>
-                Active Tasks <strong>{todos.active.length}</strong>
+                Active Tasks <strong>{active.length}</strong>
               </span>
-              {todos.active.map((todo, index) => (
+              {active.map((todo, index) => (
                 <SingleTodo key={todo.id} index={index} todo={todo} />
               ))}
               {provider.placeholder}
@@ -73,9 +94,9 @@ const TodoList: React.FC = () => {
               {...provider.droppableProps}
             >
               <span className='todos__heading'>
-                Completed Tasks <strong>{todos.completed.length}</strong>
+                Completed Tasks <strong>{completed.length}</strong>
               </span>
-              {todos.completed.map((todo, index) => (
+              {completed.map((todo, index) => (
                 <SingleTodo key={todo.id} index={index} todo={todo} />
               ))}
               {provider.placeholder}

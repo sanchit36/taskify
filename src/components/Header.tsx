@@ -1,11 +1,12 @@
 import ProgressBar from '@ramonak/react-progress-bar';
 import React, { useContext } from 'react';
+
 import { TodoContext } from '../context/Todo';
+import { UserContext } from '../context/User';
 
 const Header = () => {
-  const {
-    todos: { active, completed },
-  } = useContext(TodoContext);
+  const { user } = useContext(UserContext);
+  const { active, completed } = useContext(TodoContext);
   const totalTodos = active.length + completed.length;
   const completedPercentage = totalTodos
     ? Math.floor((completed.length / totalTodos) * 100)
@@ -15,6 +16,9 @@ const Header = () => {
 
   return (
     <div className='header'>
+      {user?.displayName && (
+        <h4 className='header__subtitle'>Welcome, {user?.displayName}</h4>
+      )}
       <h2 className='header__title'>
         {active.length ? (
           <span>

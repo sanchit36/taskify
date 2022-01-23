@@ -5,6 +5,8 @@ import { MdDone, MdClose } from 'react-icons/md';
 import { TodoContext } from '../context/Todo';
 import { Draggable } from 'react-beautiful-dnd';
 import Modal from './Modal';
+import { deleteTask, updateTask } from '../firebase/todo';
+import Spinner from './Spinner';
 
 interface SingleTodoProps {
   todo: Todo;
@@ -12,7 +14,7 @@ interface SingleTodoProps {
 }
 
 const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
-  const { dispatch } = useContext(TodoContext);
+  const { loading, dispatch } = useContext(TodoContext);
   const [editTodo, setEditTodo] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [show, setShow] = useState(false);
@@ -27,14 +29,20 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
     setShow(true);
   };
 
-  const handleDone = () => {
+  const handleDone = async () => {
+    dispatch({ type: 'loading', payload: `update-${todo.id}` });
+    await updateTask(todo.id, { isDone: !todo.isDone });
     dispatch({ type: 'done', payload: todo });
+    dispatch({ type: 'loading', payload: null });
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editTodo) {
+      dispatch({ type: 'loading', payload: `update-${todo.id}` });
+      await updateTask(todo.id, { todo: editTodo });
       dispatch({ type: 'update', payload: { id: todo.id, text: editTodo } });
+      dispatch({ type: 'loading', payload: null });
     }
     setEditTodo(null);
   };
@@ -47,9 +55,12 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
     setShow(false);
   };
 
-  const confirmDeleteHandler = () => {
-    setShow(false);
+  const confirmDeleteHandler = async () => {
+    dispatch({ type: 'loading', payload: 'delete' });
+    await deleteTask(todo.id);
+    dispatch({ type: 'loading', payload: null });
     dispatch({ type: 'delete', payload: todo.id });
+    setShow(false);
   };
 
   return (
@@ -63,7 +74,20 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
             <button className='btn' onClick={cancelDeleteHandler}>
               CANCEL
             </button>
-            <button className='btn danger' onClick={confirmDeleteHandler}>
+            <button
+              className='btn danger'
+              onClick={confirmDeleteHandler}
+              disabled={loading === 'delete'}
+            >
+              {loading === 'delete' && (
+                <Spinner
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    margin: 'auto',
+                  }}
+                />
+              )}
               DELETE
             </button>
           </React.Fragment>
@@ -96,12 +120,26 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
 
               {editTodo !== null ? (
                 <div>
-                  <button type='submit' className='icon'>
-                    <MdDone />
+                  <button
+                    type='submit'
+                    className='icon'
+                    disabled={loading === `update-${todo.id}`}
+                  >
+                    {loading === `update-${todo.id}` ? (
+                      <Spinner
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          margin: 'auto',
+                        }}
+                      />
+                    ) : (
+                      <MdDone />
+                    )}
                   </button>
                 </div>
               ) : (
-                <div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                   {!todo.isDone && (
                     <span
                       className='icon'
@@ -115,11 +153,31 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
                   </span>
                   {!todo.isDone ? (
                     <span className='icon' onClick={handleDone}>
-                      <MdDone />
+                      {loading === `update-${todo.id}` ? (
+                        <Spinner
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            margin: 'auto',
+                          }}
+                        />
+                      ) : (
+                        <MdDone />
+                      )}
                     </span>
                   ) : (
                     <span className='icon' onClick={handleDone}>
-                      <MdClose />
+                      {loading === `update-${todo.id}` ? (
+                        <Spinner
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            margin: 'auto',
+                          }}
+                        />
+                      ) : (
+                        <MdClose />
+                      )}
                     </span>
                   )}
                 </div>
