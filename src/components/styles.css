@@ -184,6 +184,9 @@
 .modal__footer {
   text-align: right;
   padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .icon-btn {

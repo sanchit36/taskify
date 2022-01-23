@@ -7,17 +7,8 @@ import {
   FacebookAuthProvider,
   GithubAuthProvider,
 } from 'firebase/auth';
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  getFirestore,
-  query,
-  setDoc,
-  where,
-} from 'firebase/firestore';
-import { Todo, User } from '../models/model';
+import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
+import { User } from '../models/model';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBjwVQVQF3JCV_d9Rm32MuWb3mMa5BfFjM',
@@ -46,35 +37,6 @@ export const addUser = async (user: User) => {
   } catch (error) {
     console.error('ERROR adding user', error);
     throw new Error('Error adding user');
-  }
-};
-
-// Get All tasks for a user
-export const getTasksByUserId = async (userId: string) => {
-  try {
-    const tasksRef = collection(db, 'tasks');
-    const q = query(tasksRef, where('userId', '==', userId));
-    const querySnapshot = await getDocs(q);
-
-    const active: Todo[] = [];
-    const completed: Todo[] = [];
-
-    querySnapshot.docs.forEach((doc) => {
-      const todo = {
-        id: doc.id,
-        ...doc.data(),
-      } as Todo;
-
-      if (doc.data().isDone) {
-        completed.push(todo);
-      } else {
-        active.push(todo);
-      }
-    });
-    return { active, completed };
-  } catch (error) {
-    console.error('ERROR getting tasks', error);
-    throw new Error('Error getting tasks');
   }
 };
 

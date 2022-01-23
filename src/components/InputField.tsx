@@ -1,17 +1,34 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
+
 import { TodoContext } from '../context/Todo';
+import { UserContext } from '../context/User';
+import { addTask } from '../firebase/todo';
+import Spinner from './Spinner';
 import './styles.css';
 
 const InputField: React.FC = () => {
+  const { user } = useContext(UserContext);
+  const { loading, dispatch } = useContext(TodoContext);
   const [todo, setTodo] = useState<string>('');
-  const { dispatch } = useContext(TodoContext);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleAdd = (event: React.FormEvent) => {
+  const handleAdd = async (event: React.FormEvent) => {
     event.preventDefault();
     if (todo) {
-      // dispatch({ type: 'add', payload: todo });
-      setTodo('');
+      dispatch({ type: 'loading', payload: 'add' });
+      try {
+        const newTodo = await addTask({
+          isDone: false,
+          todo,
+          userId: user?.id!,
+        });
+        dispatch({ type: 'add', payload: newTodo });
+      } catch (error) {
+        dispatch({ type: 'error', payload: 'Unable to add todo.' });
+      } finally {
+        dispatch({ type: 'loading', payload: null });
+        setTodo('');
+      }
     }
   };
 
@@ -37,8 +54,16 @@ const InputField: React.FC = () => {
         placeholder='Enter a task'
         className='input__box'
       />
-      <button className='input__submit' type='submit'>
-        Go
+      <button
+        className='input__submit'
+        type='submit'
+        disabled={loading === 'add'}
+      >
+        {loading === 'add' ? (
+          <Spinner style={{ height: '30px', width: '30px', margin: 'auto' }} />
+        ) : (
+          'GO'
+        )}
       </button>
     </form>
   );

@@ -1,8 +1,9 @@
-import { useEffect, useReducer } from 'react';
-import { addTodos } from '../helpers/localStore';
+import { useReducer } from 'react';
 import { Todo } from '../models/model';
 
 export interface State {
+  error: string | null;
+  loading: string | null;
   active: Todo[];
   completed: Todo[];
 }
@@ -18,10 +19,18 @@ type Actions =
     }
   | { type: 'delete'; payload: string }
   | { type: 'done'; payload: Todo }
-  | { type: 'set'; payload: State };
+  | { type: 'set'; payload: { active: Todo[]; completed: Todo[] } }
+  | { type: 'loading'; payload: string | null }
+  | { type: 'error'; payload: string | null };
 
 const TodoReducer = (state: State, action: Actions): State => {
   switch (action.type) {
+    case 'loading':
+      return {
+        ...state,
+        loading: action.payload,
+      };
+
     case 'add':
       return {
         ...state,
@@ -68,7 +77,10 @@ const TodoReducer = (state: State, action: Actions): State => {
         };
 
     case 'set':
-      return action.payload;
+      return {
+        ...state,
+        ...action.payload,
+      };
 
     default:
       return state;
@@ -76,6 +88,8 @@ const TodoReducer = (state: State, action: Actions): State => {
 };
 
 const INITIAL_STATE: State = {
+  error: null,
+  loading: null,
   active: [],
   completed: [],
 };
@@ -83,12 +97,11 @@ const INITIAL_STATE: State = {
 const useValue = () => {
   const [state, dispatch] = useReducer(TodoReducer, INITIAL_STATE);
 
-  useEffect(() => {
-    addTodos(state);
-  }, [state]);
-
   return {
-    todos: state,
+    loading: state.loading,
+    error: state.error,
+    active: state.active,
+    completed: state.completed,
     dispatch,
   };
 };

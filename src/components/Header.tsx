@@ -6,9 +6,7 @@ import { UserContext } from '../context/User';
 
 const Header = () => {
   const { user } = useContext(UserContext);
-  const {
-    todos: { active, completed },
-  } = useContext(TodoContext);
+  const { active, completed } = useContext(TodoContext);
   const totalTodos = active.length + completed.length;
   const completedPercentage = totalTodos
     ? Math.floor((completed.length / totalTodos) * 100)
