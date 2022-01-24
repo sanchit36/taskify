@@ -35,7 +35,7 @@ const Navbar = () => {
               fontSize: '15px',
               width: 'auto',
               margin: '0',
-              marginRight: '1.5rem',
+              marginRight: '.5rem',
             }}
           />
           <Avatar image={user?.avatar!} />
