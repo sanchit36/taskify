@@ -1,12 +1,14 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Todo } from '../models/model';
 import { AiFillDelete, AiFillEdit } from 'react-icons/ai';
 import { MdDone, MdClose } from 'react-icons/md';
-import { TodoContext } from '../context/Todo';
 import { Draggable } from 'react-beautiful-dnd';
+
+import { Todo } from '../models/model';
+import { TodoContext } from '../context/Todo';
 import Modal from './Modal';
 import { deleteTask, updateTask } from '../firebase/todo';
 import Spinner from './Spinner';
+import './SingleTodo.css';
 
 interface SingleTodoProps {
   todo: Todo;
@@ -119,7 +121,7 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
               )}
 
               {editTodo !== null ? (
-                <div>
+                <div className='todos__single--icons'>
                   <button
                     type='submit'
                     className='icon'
@@ -139,7 +141,7 @@ const SingleTodo: React.FC<SingleTodoProps> = ({ todo, index }) => {
                   </button>
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className='todos__single--icons'>
                   {!todo.isDone && (
                     <span
                       className='icon'
